@@ -233,28 +233,49 @@ function renderTimeline() {
                 cluster.appendChild(grid);
                 eraGroup.appendChild(cluster);
 
-                // 드래그 앤 드롭 기능 추가 (이벤트 카드용)
+                // 드래그 앤 드롭 기능 추가 (이벤트 카드용 - 자유로운 드래그)
                 console.log('Creating Sortable for grid:', grid, 'with items:', grid.children.length);
                 if (typeof Sortable !== 'undefined') {
                     const sortable = new Sortable(grid, {
-                        group: 'events', // 이벤트 카드 그룹
-                        animation: 200,
-                        delayOnTouchStart: 3,
-                        touchStartThreshold: 3,
+                        group: {
+                            name: 'events', // 이벤트 카드 그룹
+                            pull: true, // 다른 리스트로 드래그 가능
+                            put: true  // 다른 리스트에서 드래그 가능
+                        },
+                        animation: 150,
+                        delayOnTouchStart: 2,
+                        touchStartThreshold: 2,
                         forceFallback: false,
                         removeClone: true,
-                        swapThreshold: 0.5,
                         ghostClass: 'sortable-ghost',
                         chosenClass: 'sortable-chosen',
                         dragClass: 'sortable-drag',
+                        fallbackClass: 'sortable-fallback',
                         onStart: function(evt) {
                             console.log('Event drag started:', evt.item.dataset.id);
+                            evt.item.style.opacity = '0.7';
                         },
                         onEnd: function(evt) {
-                            console.log('Event drag ended:', evt.item.dataset.id, 'to', evt.to.dataset.month);
+                            evt.item.style.opacity = '1';
+                            console.log('Event drag ended:', evt.item.dataset.id);
+                            
+                            if (!evt.to || !evt.to.dataset.month) {
+                                console.log('Drop target is not a valid grid');
+                                return;
+                            }
+                            
                             const movedId = evt.item.dataset.id;
                             const newMonth = evt.to.dataset.month;
-                            const parts = evt.to.dataset.yearKey.split(' ');
+                            const yearKey = evt.to.dataset.yearKey;
+                            
+                            if (!yearKey) {
+                                console.error('Year key not found');
+                                return;
+                            }
+                            
+                            const parts = yearKey.split(' ');
+                            
+                            console.log('Updating:', movedId, 'to month:', newMonth, '| era:', parts[0], '| year:', parts[1]);
 
                             // Firebase에 업데이트
                             if (db && db.ref) {
@@ -264,7 +285,6 @@ function renderTimeline() {
                                     year: parts[1].replace('년', '')
                                 }).then(() => {
                                     console.log('Firebase update successful');
-                                    reorderAll();
                                 }).catch(error => {
                                     console.error('Firebase update failed:', error);
                                 });

@@ -433,16 +433,26 @@ textarea {
 
 /* Sortable 드래그 스타일 */
 .sortable-ghost {
-    opacity: 0.4;
+    opacity: 0.3;
+    background: #e7f5ff;
+    box-shadow: inset 0 0 8px rgba(77, 171, 247, 0.2);
 }
 
 .sortable-chosen {
     cursor: grabbing !important;
+    background: #fff9db;
 }
 
 .sortable-drag {
+    transform: rotate(5deg) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    opacity: 0.95;
+    z-index: 1000;
+}
+
+.sortable-fallback {
     transform: rotate(5deg);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    opacity: 0.8;
 }
 
 .drawer-backdrop {
